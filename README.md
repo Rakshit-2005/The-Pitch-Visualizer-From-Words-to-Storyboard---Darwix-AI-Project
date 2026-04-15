@@ -128,15 +128,15 @@ team closes deals 40% faster and spends their time on strategy and
 relationship building instead of busywork.
 ```
 
-### Real Sample Output (Generated)
+## 🖼️ Output Section
 
-Input narrative used:
+This was prompt:
 
 ```
 A fast-growing D2C skincare brand was losing customers because support replies were delayed during peak sale hours. The support team was juggling chat, email, and order dashboards while customers waited for return updates. They introduced an AI support assistant that classified tickets, drafted replies, and routed urgent issues to human agents.
 ```
 
-Generation settings used:
+Image generated from the above prompt (style: photorealistic, use_api: true, quality: high):
 
 ```json
 {
