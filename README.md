@@ -149,16 +149,16 @@ Image generated from the above prompt (style: photorealistic, use_api: true, qua
 Generated scene outputs (the 3 images from this prompt):
 
 **Scene 1**  
-![Scene 1 Output](docs/images/example_scene_1.png)
-[Direct file](docs/images/example_scene_1.png)
+![Scene 1 Output](docs1/images/example_scene_1.png)
+[Direct file](docs1/images/example_scene_1.png)
 
 **Scene 2**  
-![Scene 2 Output](docs/images/example_scene_2.png)
-[Direct file](docs/images/example_scene_2.png)
+![Scene 2 Output](docs1/images/example_scene_2.png)
+[Direct file](docs1/images/example_scene_2.png)
 
 **Scene 3**  
-![Scene 3 Output](docs/images/example_scene_3.png)
-[Direct file](docs/images/example_scene_3.png)
+![Scene 3 Output](docs1/images/example_scene_3.png)
+[Direct file](docs1/images/example_scene_3.png)
 
 ### Example Process
 
