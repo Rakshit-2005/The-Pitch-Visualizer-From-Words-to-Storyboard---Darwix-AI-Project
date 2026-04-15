@@ -14,6 +14,17 @@ Transform your narrative text into stunning, multi-panel visual storyboards powe
 **What You Give**: A customer success story or sales pitch (3-5 sentences)  
 **What You Get**: A professional, visually compelling storyboard with 3+ AI-generated images
 
+## ✅ Deliverables Checklist
+
+This repository is organized to satisfy the assessment requirements:
+
+1. **Single GitHub repository URL**: All source code, assets, and documentation live in this repo.
+2. **Complete runnable source code**: `fastapi_app.py`, `image_generator.py`, `text_processor.py`, and `storyboard_generator.py` work together end to end.
+3. **Clear setup instructions**: The Quick Start section below explains environment creation, dependency installation, and execution.
+4. **API key management**: Gemini configuration uses a local `.env` file so secrets stay out of GitHub.
+5. **Design choices and methodology**: The Prompt Engineering section explains how narrative text becomes scene-specific image prompts.
+6. **Working examples**: The README includes sample inputs, output screenshots, and usage notes.
+
 ---
 
 ## 🚀 Quick Start
@@ -63,9 +74,11 @@ pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121
 
 ### Configuration
 
-#### Option 1: Use Simple Prompt Enhancement (No API Key Needed) ✅
+Follow these steps in order:
 
-The app will work out of the box with basic prompt enhancement. Just run it!
+#### 1. Start without an API key
+
+The app works with built-in prompt enhancement if you want to test the pipeline first.
 
 ```bash
 .venv312\Scripts\python.exe fastapi_app.py
@@ -73,32 +86,34 @@ The app will work out of the box with basic prompt enhancement. Just run it!
 
 Then open your browser to: `http://localhost:5001`
 
-#### Option 2: Enable Gemini API for Advanced Prompt Engineering (Recommended)
+#### 2. Create a secure `.env` file for Gemini
 
-For superior results, use Google's Gemini API to intelligently enhance prompts.
+For better prompt quality, use Google's Gemini API.
 
-**Get a Free API Key:**
 1. Visit [Google AI Studio](https://aistudio.google.com/apikey)
-2. Click "Create API Key" (no credit card required)
-3. Copy your key
+2. Click "Create API Key" and copy the generated key
+3. Create a file named `.env` in the project root
+4. Add this line to the file:
 
-**Setup with .env File (Secure - Recommended):**
-
-1. Create a `.env` file in the project root (same folder as `fastapi_app.py`):
-```
+```text
 GEMINI_API_KEY=your-api-key-here
 ```
 
-2. Replace `your-api-key-here` with your actual API key
+5. Replace `your-api-key-here` with your real key
 
-3. Run the app:
+#### 3. Keep secrets out of GitHub
+
+This project already includes `.env` in `.gitignore`, so the API key stays local and is never pushed to the repository. Use `.env.example` as the public template, and create your own private `.env` locally.
+
+#### 4. Run the app again
+
 ```bash
 .venv312\Scripts\python.exe fastapi_app.py
 ```
 
-**⚠️ SECURITY NOTE**: The `.env` file is automatically ignored by Git (see `.gitignore`). Your API key will **never** be committed to GitHub. Each developer/user must create their own `.env` file with their own API key.
+#### 5. Verify the app is working
 
-**Reference**: See `.env.example` for the configuration template.
+Open `http://localhost:5001` and generate a storyboard from a 3-5 sentence narrative.
 
 ---
 
@@ -432,6 +447,19 @@ rm -rf ~/.cache/huggingface/  # On Mac/Linux
 
 The heart of high-quality storyboards is **intelligent prompt engineering**.
 
+### Methodology
+
+The pipeline is intentionally structured to reduce vague or collage-like images:
+
+1. **Text validation**: The input is checked to ensure it contains enough sentence-level structure for 3 scenes.
+2. **Scene segmentation**: The narrative is split into sequential scenes so each image represents one moment.
+3. **Prompt rewriting**: Each scene is converted into a visual description that includes subject, action, emotion, setting, and style.
+4. **Rendering constraints**: Prompts are normalized to request a single scene and discourage text overlays, split panels, and collage artifacts.
+5. **Negative prompting**: The image model is given exclusions such as blurry, distorted, text, watermark, collage, and screenshot.
+6. **Generation tuning**: Step count and guidance scale are adjusted so the model follows the prompt more closely.
+
+This is why the project produces cleaner storyboard-style frames instead of generic AI art.
+
 ### What Makes a Good Image Prompt?
 
 **Weak**: "A person at a desk"  
@@ -459,6 +487,18 @@ office. Photorealistic, cinematic, joy and discovery evident."
 ↓
 Stable Diffusion generates: [Beautiful image]
 ```
+
+### Why This Works
+
+Gemini improves the prompt by adding concrete visual details that the diffusion model can render reliably. Instead of a short sentence like "Sarah discovered our platform", the generated prompt includes:
+
+- a clear subject
+- a visible emotion
+- a specific environment
+- lighting direction
+- an artistic style target
+
+That extra structure gives Stable Diffusion a much better target and reduces ambiguous or low-detail outputs.
 
 ---
 
