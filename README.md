@@ -82,27 +82,23 @@ For superior results, use Google's Gemini API to intelligently enhance prompts.
 2. Click "Create API Key" (no credit card required)
 3. Copy your key
 
-**Set the Environment Variable:**
+**Setup with .env File (Secure - Recommended):**
 
-**On Windows (PowerShell):**
-```powershell
-$env:GEMINI_API_KEY = "your-api-key-here"
+1. Create a `.env` file in the project root (same folder as `fastapi_app.py`):
+```
+GEMINI_API_KEY=your-api-key-here
 ```
 
-**On Windows (Command Prompt):**
-```cmd
-set GEMINI_API_KEY=your-api-key-here
-```
+2. Replace `your-api-key-here` with your actual API key
 
-**On Mac/Linux:**
-```bash
-export GEMINI_API_KEY="your-api-key-here"
-```
-
-**Then start the app:**
+3. Run the app:
 ```bash
 .venv312\Scripts\python.exe fastapi_app.py
 ```
+
+**⚠️ SECURITY NOTE**: The `.env` file is automatically ignored by Git (see `.gitignore`). Your API key will **never** be committed to GitHub. Each developer/user must create their own `.env` file with their own API key.
+
+**Reference**: See `.env.example` for the configuration template.
 
 ---
 
