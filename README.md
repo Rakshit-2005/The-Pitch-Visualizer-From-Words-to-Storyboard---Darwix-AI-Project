@@ -540,6 +540,39 @@ docker run -p 5001:5001 pitch-visualizer
 
 ---
 
+## ⚠️ Why This Project Is NOT Deployed to Cloud
+
+This project intentionally runs **locally only** for the following reasons:
+
+### Resource Constraints
+- **Model Size**: Stable Diffusion (~4GB) exceeds free cloud tier storage limits
+- **GPU Requirements**: Image generation requires GPU (2-5 min/image); free tiers have no GPU
+- **Processing Time**: Model loading takes 30-60 seconds; cloud timeouts would kill requests
+- **Memory**: Requires 8GB+ RAM available; most free tiers offer 512MB-2GB
+
+### Cost Impact
+- **Free Tiers** (Render, Railway, Heroku): Cannot handle model downloads or GPU
+- **GPU Instances** (AWS, Google Cloud, Azure): $0.50-$3.00/hour = **$12-72/day minimum**
+- **Operating Cost**: Even modest usage quickly becomes expensive for demo purposes
+
+### Better Alternative: Local + Demo Videos
+Instead of cloud deployment, this project includes:
+- ✅ **Comprehensive README** with easy local setup (Python 3.12 + CUDA)
+- ✅ **Demo Videos** ([website_proof/](website_proof/)) showing real working output without timeouts
+- ✅ **Reproducible Setup** – Evaluators can run locally in 15 minutes (including model download)
+- ✅ **Zero Latency** – No network delays, pure local execution
+- ✅ **Full GPU Utilization** – Your NVIDIA RTX 3050 runs at full speed
+
+### When to Deploy
+Only deploy to cloud if you need:
+- Persistent 24/7 URL for production
+- Multiple concurrent users
+- Monthly budget allocation ($20-50+ for GPU instances)
+
+For assessments and demos, **local deployment + videos is the professional choice**.
+
+---
+
 ## 📜 License
 
 This project is open source. Feel free to use and modify for personal or commercial purposes.
