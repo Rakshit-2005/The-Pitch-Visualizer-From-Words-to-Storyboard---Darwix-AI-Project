@@ -64,8 +64,15 @@ class ImageGenerator:
             print("Make sure you have enough disk space (~4GB) and stable internet connection")
             raise
     
-    def generate_image(self, prompt: str, height: int = 512, width: int = 512, 
-                       steps: int = 20) -> Optional[Image.Image]:
+    def generate_image(
+        self,
+        prompt: str,
+        height: int = 512,
+        width: int = 512,
+        steps: int = 20,
+        guidance_scale: float = 8.5,
+        negative_prompt: Optional[str] = None,
+    ) -> Optional[Image.Image]:
         """
         Generate a single image from a prompt
         
@@ -84,10 +91,11 @@ class ImageGenerator:
             with torch.no_grad():
                 image = self.pipeline(
                     prompt,
+                    negative_prompt=negative_prompt,
                     height=height,
                     width=width,
                     num_inference_steps=steps,
-                    guidance_scale=7.5
+                    guidance_scale=guidance_scale
                 ).images[0]
             
             print("Image generated successfully!")
@@ -97,9 +105,16 @@ class ImageGenerator:
             print(f"Error generating image: {str(e)}")
             return None
     
-    def generate_images_batch(self, prompts: List[str], output_dir: str = "outputs",
-                             height: int = 512, width: int = 512, 
-                             steps: int = 20) -> List[tuple]:
+    def generate_images_batch(
+        self,
+        prompts: List[str],
+        output_dir: str = "outputs",
+        height: int = 512,
+        width: int = 512,
+        steps: int = 20,
+        guidance_scale: float = 8.5,
+        negative_prompt: Optional[str] = None,
+    ) -> List[tuple]:
         """
         Generate multiple images from a list of prompts
         
@@ -121,7 +136,14 @@ class ImageGenerator:
         for i, prompt in enumerate(prompts, 1):
             print(f"\n[{i}/{len(prompts)}] Generating image...")
             
-            image = self.generate_image(prompt, height, width, steps)
+            image = self.generate_image(
+                prompt,
+                height=height,
+                width=width,
+                steps=steps,
+                guidance_scale=guidance_scale,
+                negative_prompt=negative_prompt,
+            )
             
             if image:
                 # Save image
@@ -158,9 +180,9 @@ def get_generation_params(quality: str = "balanced") -> dict:
         dict: Generation parameters
     """
     params = {
-        "fast": {"steps": 15, "height": 512, "width": 512},
-        "balanced": {"steps": 20, "height": 512, "width": 512},
-        "high": {"steps": 30, "height": 768, "width": 768},
+        "fast": {"steps": 20, "height": 512, "width": 512, "guidance_scale": 8.5},
+        "balanced": {"steps": 28, "height": 512, "width": 512, "guidance_scale": 9.0},
+        "high": {"steps": 36, "height": 640, "width": 640, "guidance_scale": 9.5},
     }
     return params.get(quality, params["balanced"])
 

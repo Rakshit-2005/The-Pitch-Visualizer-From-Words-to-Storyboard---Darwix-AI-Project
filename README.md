@@ -20,7 +20,7 @@ Transform your narrative text into stunning, multi-panel visual storyboards powe
 
 ### Prerequisites
 
-- **Python 3.9+** (check with `python --version`)
+- **Python 3.12 recommended** (verified setup)
 - **GPU recommended** (NVIDIA for faster generation; CPU works but is slow)
 - **Internet connection** (for downloading models and API calls)
 
@@ -31,15 +31,15 @@ Transform your narrative text into stunning, multi-panel visual storyboards powe
 cd pitch-visualizer
 ```
 
-2. **Create a virtual environment** (optional but recommended)
+2. **Create a Python 3.12 virtual environment**
 ```bash
-python -m venv venv
+py -3.12 -m venv .venv312
 
 # On Windows:
-venv\Scripts\activate
+.venv312\Scripts\activate
 
 # On Mac/Linux:
-source venv/bin/activate
+source .venv312/bin/activate
 ```
 
 3. **Install dependencies**
@@ -48,10 +48,16 @@ pip install -r requirements.txt
 ```
 
 This will download:
-- Flask (web framework)
+- FastAPI + Uvicorn (web framework/server)
 - PyTorch & Stable Diffusion (image generation)
 - Google Generative AI (LLM for prompt engineering)
 - NLTK (text processing)
+
+4. **(Optional, GPU on Windows + NVIDIA) Install CUDA wheels**
+```bash
+pip uninstall torch torchvision torchaudio -y
+pip install torch==2.5.1+cu121 torchvision==0.20.1+cu121 torchaudio==2.5.1+cu121 --index-url https://download.pytorch.org/whl/cu121
+```
 
 **Note on Model Downloads**: On first run, Stable Diffusion (~4GB) and other models will be downloaded automatically. This takes 5-10 minutes depending on your internet speed.
 
@@ -62,10 +68,10 @@ This will download:
 The app will work out of the box with basic prompt enhancement. Just run it!
 
 ```bash
-python app.py
+.venv312\Scripts\python.exe fastapi_app.py
 ```
 
-Then open your browser to: `http://localhost:5000`
+Then open your browser to: `http://localhost:5001`
 
 #### Option 2: Enable Gemini API for Advanced Prompt Engineering (Recommended)
 
@@ -95,7 +101,7 @@ export GEMINI_API_KEY="your-api-key-here"
 
 **Then start the app:**
 ```bash
-python app.py
+.venv312\Scripts\python.exe fastapi_app.py
 ```
 
 ---
@@ -104,8 +110,8 @@ python app.py
 
 ### Web Interface (Recommended)
 
-1. **Start the app**: `python app.py`
-2. **Open browser**: `http://localhost:5000`
+1. **Start the app**: `.venv312\Scripts\python.exe fastapi_app.py`
+2. **Open browser**: `http://localhost:5001`
 3. **Paste your narrative** in the text area
 4. **Select style**: Photorealistic, Cartoon, Watercolor, etc.
 5. **Choose quality**: Fast, Balanced, or High
@@ -121,6 +127,32 @@ our automation platform and implemented it across her team. Now her
 team closes deals 40% faster and spends their time on strategy and 
 relationship building instead of busywork.
 ```
+
+### Real Sample Output (Generated)
+
+Input narrative used:
+
+```
+A fast-growing D2C skincare brand was losing customers because support replies were delayed during peak sale hours. The support team was juggling chat, email, and order dashboards while customers waited for return updates. They introduced an AI support assistant that classified tickets, drafted replies, and routed urgent issues to human agents.
+```
+
+Generation settings used:
+
+```json
+{
+    "style": "photorealistic",
+    "use_api": true,
+    "quality": "high"
+}
+```
+
+Generated scene outputs:
+
+![Generated Scene 1](docs/images/example_scene_1.png)
+
+![Generated Scene 2](docs/images/example_scene_2.png)
+
+![Generated Scene 3](docs/images/example_scene_3.png)
 
 ### Example Process
 
@@ -170,7 +202,8 @@ Choose from 6 artistic styles for your storyboard:
 
 ```
 pitch-visualizer/
-├── app.py                    # Main Flask web application
+├── fastapi_app.py            # Main FastAPI web application
+├── app.py                    # Flask variant (legacy path)
 ├── text_processor.py         # Text segmentation & validation
 ├── prompt_engineer.py        # LLM-powered prompt enhancement
 ├── image_generator.py        # Stable Diffusion integration
@@ -224,7 +257,7 @@ Enhanced: "A frustrated sales professional at a desk surrounded by
 
 ### Change Image Generation Quality
 
-Edit `app.py`, line with `get_generation_params()`:
+Edit `fastapi_app.py`, line with `get_generation_params()`:
 
 ```python
 # More steps = better quality but slower
@@ -237,7 +270,7 @@ gen_params = {
 
 ### Use CPU-Only Mode (No GPU)
 
-In `app.py`, change:
+In `fastapi_app.py`, change:
 ```python
 generator = ImageGenerator(use_cpu=True)  # Set to True
 ```
@@ -299,8 +332,8 @@ Or send `use_api: false` in API request.
 ```json
 {
     "status": "online",
-    "has_gpu": true,
-    "gemini_configured": true
+    "gemini_configured": true,
+    "image_generation_available": true
 }
 ```
 
@@ -459,7 +492,7 @@ His productivity doubled within weeks."
 
 ### Local Deployment (Current)
 ```bash
-python app.py
+.venv312\Scripts\python.exe fastapi_app.py
 ```
 
 ### Docker Deployment
@@ -472,17 +505,17 @@ COPY . .
 RUN pip install -r requirements.txt
 ENV GEMINI_API_KEY=your-key-here
 EXPOSE 5000
-CMD ["python", "app.py"]
+CMD ["uvicorn", "fastapi_app:app", "--host", "0.0.0.0", "--port", "5001"]
 ```
 
 Build and run:
 ```bash
 docker build -t pitch-visualizer .
-docker run -p 5000:5000 pitch-visualizer
+docker run -p 5001:5001 pitch-visualizer
 ```
 
 ### Cloud Deployment (Heroku/Railway)
-1. Add `Procfile`: `web: python app.py`
+1. Add `Procfile`: `web: uvicorn fastapi_app:app --host 0.0.0.0 --port $PORT`
 2. Set `GEMINI_API_KEY` in environment vars
 3. Deploy as normal
 

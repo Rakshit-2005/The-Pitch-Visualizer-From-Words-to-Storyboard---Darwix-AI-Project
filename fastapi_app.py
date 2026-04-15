@@ -33,6 +33,10 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+NEGATIVE_PROMPT = (
+    "low quality, blurry, distorted face, deformed body, extra limbs, text, letters, words, captions, "
+    "watermark, logo, UI, screenshot, collage, split screen, tiled layout, cropped, jpeg artifacts, noisy"
+)
 
 
 def get_gemini_api_key() -> str:
@@ -51,6 +55,25 @@ def create_simple_prompt(sentence: str, style: str = "photorealistic") -> str:
     }
     keywords = style_keywords.get(style, style_keywords["photorealistic"])
     return f"{sentence} Visual style: {keywords}, attention to emotion and atmosphere."
+
+
+def to_render_prompt(prompt_text: str, style: str) -> str:
+    """Normalize prompts for cleaner, single-frame image generation."""
+    style_map = {
+        "photorealistic": "photorealistic cinematic photography",
+        "cartoon": "high-quality cartoon illustration",
+        "watercolor": "watercolor painting",
+        "digital art": "digital concept art",
+        "oil painting": "classical oil painting",
+        "sketch": "detailed pencil sketch",
+    }
+    style_phrase = style_map.get(style, "photorealistic cinematic photography")
+    return (
+        "Single scene, one moment, one setting. "
+        f"{prompt_text}. "
+        f"Style: {style_phrase}. "
+        "Professional composition, clean subject focus, realistic proportions, no text in image."
+    )
 
 
 class GenerateRequest(BaseModel):
@@ -118,8 +141,10 @@ def generate_storyboard(payload: GenerateRequest):
             prompts = []
             for seg in segments:
                 prompt_instruction = (
-                    "You are an expert visual prompt engineer. Convert the following narrative scene into "
-                    "a vivid, concrete image-generation prompt. Keep it concise and cinematic. "
+                    "You are an expert visual prompt engineer. Convert the narrative into one clean cinematic "
+                    "single-frame image prompt. Mention subject, setting, camera framing, lighting, mood, "
+                    "and key visual details. Avoid UI/screenshot aesthetics and avoid text in image. "
+                    "Return exactly one prompt sentence. "
                     f"Style: {style}. Scene: {seg}"
                 )
                 response = requests.post(
@@ -139,9 +164,9 @@ def generate_storyboard(payload: GenerateRequest):
                     generated = result["candidates"][0]["content"]["parts"][0]["text"]
                 except (KeyError, IndexError, TypeError):
                     generated = create_simple_prompt(seg, style)
-                prompts.append(generated)
+                prompts.append(to_render_prompt(generated, style))
         else:
-            prompts = [create_simple_prompt(seg, style) for seg in segments]
+            prompts = [to_render_prompt(create_simple_prompt(seg, style), style) for seg in segments]
 
         if not DIFFUSERS_AVAILABLE:
             raise HTTPException(
@@ -156,6 +181,7 @@ def generate_storyboard(payload: GenerateRequest):
             image_results = generator.generate_images_batch(
                 prompts,
                 output_dir=OUTPUTS_DIR,
+                negative_prompt=NEGATIVE_PROMPT,
                 **gen_params,
             )
         finally:

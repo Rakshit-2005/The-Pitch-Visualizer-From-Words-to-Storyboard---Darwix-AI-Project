@@ -21,6 +21,8 @@ wheels/
 *.egg
 
 # Virtual environments
+.venv/
+.venv312/
 venv/
 ENV/
 env/
@@ -57,3 +59,6 @@ huggingface_cache/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local screenshots
+Screenshot *.png

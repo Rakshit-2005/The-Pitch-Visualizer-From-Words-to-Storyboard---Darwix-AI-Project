@@ -36,6 +36,28 @@ os.makedirs(OUTPUTS_DIR, exist_ok=True)
 
 # Global variables to handle multiple requests
 current_task = None
+NEGATIVE_PROMPT = (
+    "low quality, blurry, distorted face, deformed body, extra limbs, text, letters, words, captions, "
+    "watermark, logo, UI, screenshot, collage, split screen, tiled layout, cropped, jpeg artifacts, noisy"
+)
+
+
+def to_render_prompt(prompt_text: str, style: str) -> str:
+    style_map = {
+        "photorealistic": "photorealistic cinematic photography",
+        "cartoon": "high-quality cartoon illustration",
+        "watercolor": "watercolor painting",
+        "digital art": "digital concept art",
+        "oil painting": "classical oil painting",
+        "sketch": "detailed pencil sketch",
+    }
+    style_phrase = style_map.get(style, "photorealistic cinematic photography")
+    return (
+        "Single scene, one moment, one setting. "
+        f"{prompt_text}. "
+        f"Style: {style_phrase}. "
+        "Professional composition, clean subject focus, realistic proportions, no text in image."
+    )
 
 
 def get_gemini_api_key():
@@ -82,7 +104,7 @@ def generate_storyboard():
         if use_api:
             if PromptEngineer is None:
                 # Fallback if Gemini API is not available
-                prompts = [create_simple_prompt(seg, style) for seg in segments]
+                prompts = [to_render_prompt(create_simple_prompt(seg, style), style) for seg in segments]
             else:
                 api_key = get_gemini_api_key()
                 if not api_key:
@@ -92,17 +114,17 @@ def generate_storyboard():
                     }), 400
 
                 if not PROMPT_ENGINEER_GEMINI_AVAILABLE:
-                    prompts = [create_simple_prompt(seg, style) for seg in segments]
+                    prompts = [to_render_prompt(create_simple_prompt(seg, style), style) for seg in segments]
                 else:
                     try:
                         engineer = PromptEngineer(api_key)
-                        prompts = engineer.enhance_prompts_batch(segments, style)
+                        prompts = [to_render_prompt(p, style) for p in engineer.enhance_prompts_batch(segments, style)]
                     except Exception:
                         # If SDK fails at runtime (e.g. Python version/protobuf issues), continue with fallback prompts.
-                        prompts = [create_simple_prompt(seg, style) for seg in segments]
+                        prompts = [to_render_prompt(create_simple_prompt(seg, style), style) for seg in segments]
         else:
             # Use fallback method
-            prompts = [create_simple_prompt(seg, style) for seg in segments]
+            prompts = [to_render_prompt(create_simple_prompt(seg, style), style) for seg in segments]
         
         # Generate images
         print(f"[3/5] Generating images...")
@@ -111,6 +133,7 @@ def generate_storyboard():
         image_results = generator.generate_images_batch(
             prompts,
             output_dir=OUTPUTS_DIR,
+            negative_prompt=NEGATIVE_PROMPT,
             **gen_params
         )
         generator.cleanup()
